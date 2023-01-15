@@ -1,13 +1,35 @@
 import Questions from "./Questions"
 
+import { useDispatch, useSelector } from 'react-redux'
+import { useEffect } from "react"
+import { nextQuestion, prevQuestion } from "../redux/question_reducer"
+
 export default function Quiz(){
 
+    const dispatch = useDispatch()
+
+    const state = useSelector(state => state)
+
+    useEffect(()=> {
+        console.log(state)
+    })
+
     const onNext = () => {
-        alert("next clicked")
+
+        if(state.questions.queue.length === state.questions.trace + 1){
+            alert("No next question");
+            return
+        }
+        
+        dispatch(nextQuestion())
     }
 
     const onPrev = () => {
-        alert("prev clicked")
+        if(state.questions.trace < 1){
+            alert("No prev question");
+            return
+        }
+        dispatch(prevQuestion())
     }
 
     return (
