@@ -12,7 +12,7 @@ export const questionReducer = createSlice({
     },
     reducers: {
         startExamAction: (state, action) => {
-            
+
             return {
                 ...state,
                 queue: action.payload
@@ -21,15 +21,23 @@ export const questionReducer = createSlice({
 
         nextQuestion: (state, action) => {
             return {
-                ...state, trace: state.trace+1
+                ...state, trace: state.trace + 1
             }
         },
 
         prevQuestion: (state, action) => {
-            return {...state, trace: state.trace - 1}
+            return { ...state, trace: state.trace - 1 }
+        },
+
+        resetAllAction: (state, action) => {
+            return {
+                queue: [],
+                answers: [],
+                trace: 0
+            }
         }
     }
 });
 
-export const { startExamAction, nextQuestion, prevQuestion } = questionReducer.actions;
+export const { startExamAction, nextQuestion, prevQuestion, resetAllAction } = questionReducer.actions;
 export default questionReducer.reducer;
