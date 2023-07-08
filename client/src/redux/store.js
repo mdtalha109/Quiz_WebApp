@@ -1,12 +1,13 @@
-import { combineReducers, configureStore } from '@reduxjs/toolkit'
-import { questionReducer } from './question_reducer'
-import { resultReducer } from './result_reducer'
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import questionReducer from './question_reducer'; // Update import statement
+import resultReducer from './result_reducer'; // Update import statement
 
 const rootReducer = combineReducers({
-    questions : questionReducer,
-    result : resultReducer
-})
+  questions: questionReducer,
+  results: resultReducer // Assuming you have a resultReducer file and want to combine it as well
+});
 
-// create store with reducer
-
-export default configureStore({reducer: rootReducer})
+// create store with rootReducer
+export default configureStore({
+  reducer: rootReducer
+});
