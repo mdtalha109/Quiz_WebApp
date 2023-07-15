@@ -1,20 +1,31 @@
-import express from 'express'
-import dotenv from 'dotenv'
-import bodyparser from 'body-parser'
+import express from 'express';
+import dotenv from 'dotenv';
+import { applyMiddleware, applyRoutes } from './utils/index.js';
+import routes from './routes/index.js';
+import bodyParser from 'body-parser'
 import cors from 'cors'
+import connectDB from './config/db.js';
 
 dotenv.config();
 
 const app = express();
-app.use(cors())
 
-app.use(bodyparser.urlencoded({ extended: true }));
+// Connect to the database
+connectDB().then(() => {
+  
+});
 
-app.use(express.urlencoded({ extended: true }))
+applyMiddleware(app, [
+  bodyParser.urlencoded({ extended: true }),
+  express.urlencoded({ extended: true }),
+  express.json(),
+  cors()
+]);
 
-app.use(express.json())
+applyRoutes(app, routes);
 
-const PORT = process.env.PORT || 2000;
+const PORT = process.env.PORT || 3000;
 
-app.listen(PORT);
-console.log(PORT)
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
