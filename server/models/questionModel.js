@@ -13,35 +13,10 @@ const QuestionSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
-});
-
-
-
-const QuizSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true
-  },
-  description: {
-    type: String,
-    required: true
-  },
-  category: {
-    type: String,
+  topic: {
+    type: [mongoose.Schema.Types.ObjectId],
     required: true,
-  },
-  questions: {
-    type: [QuestionSchema],
-    required: true
-  },
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+    ref: 'QuizTopic'
   },
   createdAt: {
     type: Date,
@@ -49,5 +24,7 @@ const QuizSchema = new mongoose.Schema({
   }
 });
 
-export default mongoose.model('Quiz', QuizSchema);
-export const QuestionModel = mongoose.model("QuestionModel", QuestionSchema)
+
+
+
+export const QuestionModel = mongoose.model("Questions", QuestionSchema)

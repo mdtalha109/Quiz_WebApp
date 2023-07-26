@@ -9,9 +9,10 @@ const QuizSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    category: {
-        type: String,
+    topic: {
+        type: [mongoose.Schema.Types.ObjectId],
         required: true,
+        ref: 'QuizTopic'
     },
     questions: {
         type: [mongoose.Schema.Types.ObjectId],
