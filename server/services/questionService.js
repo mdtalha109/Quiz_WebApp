@@ -1,4 +1,6 @@
 import { QuestionModel } from '../models/questionModel.js';
+import  quizTopicModel  from '../models/quizTopicModel.js';
+
 
 /**
  * Get a question by its ID.
@@ -49,7 +51,6 @@ const createQuestion = async (req, res) => {
  */
 const deleteQuestion = async (req, res) => {
   const questionId = req.params.id; // Assuming the question ID is passed as a parameter in the request
-
   try {
     const deletedQuestion = await QuestionModel.findByIdAndDelete(questionId);
 
@@ -63,10 +64,37 @@ const deleteQuestion = async (req, res) => {
   }
 }
 
+const getQuestionByTopic = async(req, res) => {
+
+  try{
+    const {topicName} = req.body
+
+    console.log("topicName: ", topicName)
+
+    const quizTopic = await quizTopicModel.find({name: topicName})
+    if(!quizTopic){
+      res.status(404).json({message: "this topic doesn't exit anymore "})
+    }
+    
+    let quizTopicId = quizTopic[0]._id;
+  
+    let questions = await QuestionModel.find({topic: quizTopicId})
+
+    res.status(200).json(questions)
+
+  } catch(err){
+    console.log("error in fetching question by topic")
+  }
+ 
+
+  
+}
+
 const questionService = {
   getQuestion,
   createQuestion,
-  deleteQuestion
+  deleteQuestion,
+  getQuestionByTopic
 }
 
 export default questionService;
