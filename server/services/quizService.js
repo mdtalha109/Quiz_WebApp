@@ -1,25 +1,89 @@
 import quizModel from "../models/quizModel.js";
+import quizTopicModel  from '../models/quizTopicModel.js';
+import { QuestionModel } from '../models/questionModel.js';
+import mongoose from "mongoose";
 
-const createQuiz = async(req, res) => {
-    const {title, description, category, questions} = req.body
+const getQuizCategoryList = async (req, res) => {
     try {
-        const createdQuiz = await quizModel.create({
-            title,
-            description,
-            category,
-            questions : JSON.parse(questions)
-        });
 
-        if(createdQuiz){
-            res.status(201).json({message: "Quiz created successfully"})
+        let quizCategoryList = await quizModel.distinct('category');
+
+        res.status(200).json(quizCategoryList)
+
+    } catch (err) {
+
+        res.status(404).json({ message: "Something went wrong..!!", err })
+    }
+}
+
+const createQuiz = async (req, res) => {
+
+    console.log("inside create quiz")
+
+    const { topic } = req.body
+    try {
+        // Sanity check
+        const quizTopic = await quizTopicModel.findOne({ name: topic });
+
+        if (!quizTopic) {
+            return res.status(404).json({ error: 'Topic not found' });
         }
+
+        // fetch random 5 question
+        const questions = await QuestionModel.aggregate([
+            { $match: { topic: new mongoose.Types.ObjectId(quizTopic._id) } },
+            { $sample: { size: 5 } },
+        ]);
+
+        // create quiz
+        const quizData = {
+            title: `${topic} quiz`,
+            description: `${topic} descriptions`,
+            topic: quizTopic._id,
+            questions: questions.map((question) => question._id),
+        };
+
+        const quiz = await quizModel.create(quizData);
+
+        res.status(201).json(quiz._id);
+
     } catch (error) {
-            res.status(404).json({message: "Something went wrong..", error})
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+const fetchQuizById = async(req, res) => {
+    const {id} = req.params;
+    try{
+        console.log("quiz id: ", id)
+        const resultedQuiz =  await quizModel.findById(id).populate("questions")
+        console.log("resultedQuiz: ", resultedQuiz)
+        res.status(200).json(resultedQuiz);
+    }catch(error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+
+    
+}
+
+const deleteQuiz = async (req, res) => {
+    const quizId = req.body.id
+    try {
+        const deletedQuiz = quizModel.findByIdAndRemove(quizId);
+
+        if (deletedQuiz) {
+            return res.status(200).json({ message: 'Quiz deleted successfully!.' });
+        }
+    } catch (err) {
+        return res.status(404).json({ message: 'oops! error in deleting question.' });
     }
 }
 
 const quizService = {
-    createQuiz
+    getQuizCategoryList,
+    createQuiz,
+    fetchQuizById
 }
 
 export default quizService
