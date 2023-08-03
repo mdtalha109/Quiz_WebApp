@@ -80,10 +80,42 @@ const deleteQuiz = async (req, res) => {
     }
 }
 
+const evaluateResult = async(req, res) => {
+    try {
+        const { quizId, responses } = req.body;
+        const quiz = await quizModel.findById(quizId).populate('questions');
+        if (!quiz) {
+          return res.status(404).json({ message: 'Quiz not found' });
+        }
+    
+        const totalQuestions = quiz.questions.length;
+        let correctAnswers = 0;
+    
+        // Evaluate each response and calculate the score
+        for (let i = 0; i < totalQuestions; i++) {
+          const question = quiz.questions[i];
+          const correctOptionIndex = question.correctAnswer;
+
+          const userResponseIndex = JSON.parse(responses)[i];
+     
+          if (correctOptionIndex == userResponseIndex) {
+            correctAnswers++;
+          }
+        }
+    
+        const score = (correctAnswers / totalQuestions) * 100;
+    
+        res.json({ score: score, totalQuestions: totalQuestions });
+      } catch (error) {
+        res.status(500).json({ message: 'Server error', error });
+      }
+}
+
 const quizService = {
     getQuizCategoryList,
     createQuiz,
-    fetchQuizById
+    fetchQuizById,
+    evaluateResult
 }
 
 export default quizService
