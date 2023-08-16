@@ -5,10 +5,11 @@ import { pushAnswer } from "../../hooks/setResult"
 
 
 
-import Confetti from 'react-confetti'
+
 import Questions from '../../components/Question/Question';
 
 import './Quiz.css'
+import { useNavigate } from 'react-router-dom'
 
 
 export default function Quiz() {
@@ -17,6 +18,11 @@ export default function Quiz() {
     const width = window.innerWidth
     const height = window.innerHeight
     const dispatch = useDispatch()
+
+    const urlParts = window.location.pathname.split("/");
+    let quizId = urlParts[urlParts.length - 1];
+
+    const navigate = useNavigate()
 
     const { questions, results } = useSelector(state => state)
     
@@ -28,10 +34,12 @@ export default function Quiz() {
         
 
         if (questions.trace === questions.queue.length - 1) {
-            alert("No next question");
+            
+            navigate(`/result/${quizId}`)
+            
+            
             return
         }
-
         dispatch(nextQuestion())
         
     }
@@ -61,7 +69,7 @@ export default function Quiz() {
             <Questions onChecked={onChecked} />
             <div className='navigate_area'>
                 <button className="btn prev" onClick={onPrev} disabled={questions.trace == 0}>Prev</button>
-                <button className="btn next" onClick={onNext}>Next</button>
+                <button className="btn next" onClick={onNext}>{questions.trace === questions.queue.length - 1 ? "Finish": "Next"}</button>
             </div>
         </div>
     )
