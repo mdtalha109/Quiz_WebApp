@@ -21,8 +21,14 @@ const deleteQuestion = async (req, res) => {
     return await questionService.deleteQuestion(req, res)
 }
 
+const getQuestionByTopic = async(req, res) => {
+    return await questionService.getQuestionByTopic(req, res)
+}
+
+
 export const questionController = {
     getQuestions,
     insertQuestions,
-    deleteQuestion
+    deleteQuestion,
+    getQuestionByTopic
 };
