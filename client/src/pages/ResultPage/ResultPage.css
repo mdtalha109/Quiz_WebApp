@@ -1,0 +1,61 @@
+/* Container for overall results */
+.result-overall-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    
+}
+
+main{
+    margin: 10px 20px;
+}
+
+.section-heading{
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 10px 0;
+}
+
+/* Result card styles */
+.result-card {
+    background-color: white;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Chart section within result card */
+.result-card-chart {
+    display: flex;
+    flex-direction: row;
+}
+
+.result-card-chart > div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0 10px;
+}
+
+/* Styling for data values */
+.card-data-value {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+/* Styling for data tags */
+.card-data-tag {
+    font-size: 1.2rem;
+}
+
+@media screen and (max-width: 768px) {
+    .result-overall-container{
+        flex-direction: column;
+    }
+}
+
