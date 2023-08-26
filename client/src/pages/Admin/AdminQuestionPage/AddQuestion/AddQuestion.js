@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from 'react';
-
-import questionService from '../../../../services/questionService'
-import topicService from '../../../../services/topicService'
-
 import './AddQuestion.css'
 import useAddQuestion from './hooks/useAddQuestion';
 
-const AddQuestion = ({ toggleQuestionForm }) => {
+const AddQuestion = ({ toggleQuestionForm, editableQuestion, setQuestionsList }) => {
 
   const {
     topicList,
@@ -19,11 +15,13 @@ const AddQuestion = ({ toggleQuestionForm }) => {
     correctAnswer,
     setCorrectAnswers,
     handleAddQuestion,
-  } = useAddQuestion({ toggleQuestionForm });
+    handleupdateQuestion
+  } = useAddQuestion({ toggleQuestionForm, editableQuestion, setQuestionsList });
 
   return (
     <div className="add-question-popup">
-      <h2>Add Question</h2>
+      {editableQuestion ? <h2>Edit Question</h2> : <h2>Add Question</h2>}
+      
       <div class="container">
         <label for="selectBox">Select Question Topic:</label>
         <select id="selectBox" name="selectBox" onChange={(e) => { setSelectedTopic(e.target.value) }}>
@@ -60,11 +58,9 @@ const AddQuestion = ({ toggleQuestionForm }) => {
         type="text"
         value={correctAnswer}
         onChange={(e) => { setCorrectAnswers(e.target.value) }}
-
-
       />
-
-      <button onClick={handleAddQuestion}>Add</button>
+      {editableQuestion? <button onClick={handleupdateQuestion}>Edit</button>: <button onClick={handleAddQuestion}>Add</button>}
+      
     </div>
   );
 };
