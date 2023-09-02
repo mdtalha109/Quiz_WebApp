@@ -18,9 +18,9 @@ const getQuizCategoryList = async (req, res) => {
 
 const createQuiz = async (req, res) => {
 
-    console.log("inside create quiz")
-
     const { topic } = req.body
+
+    const createdByUserId = req.user;
     try {
         // Sanity check
         const quizTopic = await quizTopicModel.findOne({ name: topic });
@@ -34,13 +34,13 @@ const createQuiz = async (req, res) => {
             { $match: { topic: new mongoose.Types.ObjectId(quizTopic._id) } },
             { $sample: { size: 5 } },
         ]);
-
         // create quiz
         const quizData = {
             title: `${topic} quiz`,
             description: `${topic} descriptions`,
             topic: quizTopic._id,
             questions: questions.map((question) => question._id),
+            createdBy: createdByUserId
         };
 
         const quiz = await quizModel.create(quizData);
@@ -49,7 +49,7 @@ const createQuiz = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Internal server error1' });
     }
 }
 
@@ -61,7 +61,7 @@ const fetchQuizById = async(req, res) => {
         console.log("resultedQuiz: ", resultedQuiz)
         res.status(200).json(resultedQuiz);
     }catch(error) {
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Internal server error2' });
     }
 
     
@@ -80,42 +80,56 @@ const deleteQuiz = async (req, res) => {
     }
 }
 
-const evaluateResult = async(req, res) => {
+const evaluateResult = async (req, res) => {
     try {
         const { quizId, responses } = req.body;
+
         const quiz = await quizModel.findById(quizId).populate('questions');
+        let quizQuestions =  quiz.questions
+
+        let quizArr = []
+
+        quizQuestions.map((item, index) => {
+            let quizObj = {}
+
+            quizObj["question"] = item.question
+            quizObj["correctAnswer"] = item.correctAnswer
+            quizObj["selectedAnswer"] = responses[index]
+
+            quizArr.push(quizObj)
+        })
+  
         if (!quiz) {
-          return res.status(404).json({ message: 'Quiz not found' });
+            return res.status(404).json({ message: 'Quiz not found' });
         }
-    
+
         const totalQuestions = quiz.questions.length;
         let correctAnswers = 0;
-    
-        // Evaluate each response and calculate the score
-        for (let i = 0; i < totalQuestions; i++) {
-          const question = quiz.questions[i];
-          const correctOptionIndex = question.correctAnswer;
 
-          const userResponseIndex = JSON.parse(responses)[i];
-     
-          if (correctOptionIndex == userResponseIndex) {
-            correctAnswers++;
-          }
+        // Calculate the number of correct answers
+        for (let i = 0; i < totalQuestions; i++) {
+            const question = quiz.questions[i];
+            const correctOptionIndex = question.correctAnswer;
+            const userResponseIndex = responses[i];
+
+            if (correctOptionIndex === userResponseIndex) {
+                correctAnswers++;
+            }
         }
-    
+
         const score = (correctAnswers / totalQuestions) * 100;
-    
-        res.json({ score: score, totalQuestions: totalQuestions });
-      } catch (error) {
+       
+        res.json({ score, totalQuestions, quizArr });
+    } catch (error) {
         res.status(500).json({ message: 'Server error', error });
-      }
-}
+    }
+};
 
 const quizService = {
     getQuizCategoryList,
     createQuiz,
     fetchQuizById,
-    evaluateResult
+    evaluateResult,
 }
 
 export default quizService
