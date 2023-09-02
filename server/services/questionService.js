@@ -9,12 +9,11 @@ import  quizTopicModel  from '../models/quizTopicModel.js';
  * @param {object} res - The response object.
  * @returns {object} - The Question object.
  */
-const getQuestion = async (req, res) => {
+const getAllQuestions = async (req, res) => {
   try {
-    let questionId = req.params.id
-    const question = await QuestionModel.findById(questionId);
-    if (question) {
-      return res.status(200).json(question)
+    const questions = await QuestionModel.find();
+    if (questions) {
+      return res.status(200).json(questions)
     }
   } catch (error) {
     return res.status(404).json({ message: 'Question not found.' });
@@ -28,16 +27,27 @@ const getQuestion = async (req, res) => {
  * @param {object} res - The response object.
  * @returns {object} - The response object.
  */
-const createQuestion = async (req, res) => {
-  try {
-    const question = new QuestionModel(questionData);
-    const newQuestion = await question.save();
+ const createQuestion = async (req, res) => {
+  const { question, options, correctAnswer, topicName } = req.body;
 
-    if (newQuestion) {
-      res.status(201).json({ message: 'Question created successfully' })
+  try {
+    const quizTopic = await quizTopicModel.findOne({ name: topicName });
+
+    if (!quizTopic) {
+      return res.status(404).json({ message: 'Quiz topic not found.' });
     }
 
+    // Create the question
+    const createdQuestion = await QuestionModel.create({
+      question,
+      options,
+      correctAnswer,
+      topic: quizTopic._id 
+    });
+
+    return res.status(201).json(createdQuestion);
   } catch (error) {
+    console.error('Error creating question:', error);
     return res.status(500).json({ message: 'Failed to create question.' });
   }
 };
@@ -50,7 +60,7 @@ const createQuestion = async (req, res) => {
  * @returns {object} - The response object.
  */
 const deleteQuestion = async (req, res) => {
-  const questionId = req.params.id; // Assuming the question ID is passed as a parameter in the request
+  const questionId = req.params.id; 
   try {
     const deletedQuestion = await QuestionModel.findByIdAndDelete(questionId);
 
@@ -85,16 +95,55 @@ const getQuestionByTopic = async(req, res) => {
   } catch(err){
     console.log("error in fetching question by topic")
   }
- 
-
-  
 }
 
+/**
+ * Update question by its ID.
+ *
+ * @param {object} req - The request object.
+ * @param {object} res - The response object.
+ * @returns {object} - The response object.
+ */
+const updateQuestion = async (req, res) => {
+  const questionId = req.params.id; 
+  const { question, options, correctAnswer, topicName } = req.body;
+
+  try {
+    const quizTopic = await quizTopicModel.findOne({ name: topicName });
+
+    if (!quizTopic) {
+      return res.status(404).json({ message: 'Quiz topic not found.' });
+    }
+
+    const updatedQuestion = await QuestionModel.findByIdAndUpdate(
+      questionId,
+      {
+        question,
+        options,
+        correctAnswer,
+        topic: quizTopic._id,
+      },
+      { new: true } // Returns the updated document
+    );
+
+    if (!updatedQuestion) {
+      return res.status(404).json({ message: 'Question not found.' });
+    }
+
+    return res.status(200).json(updatedQuestion);
+  } catch (error) {
+    console.error('Error updating question:', error);
+    return res.status(500).json({ message: 'Failed to update question.' });
+  }
+};
+
+
 const questionService = {
-  getQuestion,
+  getAllQuestions,
   createQuestion,
   deleteQuestion,
-  getQuestionByTopic
+  getQuestionByTopic,
+  updateQuestion
 }
 
 export default questionService;

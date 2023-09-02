@@ -3,9 +3,10 @@ import { questionController } from '../controllers/index.js';
 
 const router = express.Router();
 
-router.get('/:id', questionController.getQuestions);
+router.get('/', questionController.getAllQuestions);
 router.post('/', questionController.insertQuestions);
 router.delete('/:id', questionController.deleteQuestion);
+router.put('/:id', questionController.updateQuestion)
 router.post('/get-topic-question', questionController.getQuestionByTopic)
 
 export default router;

@@ -1,20 +1,11 @@
 import questionService from "../services/questionService.js";
 
-const getQuestions = async (req, res) => {
-    return await questionService.getQuestion(req, res)
+const getAllQuestions = async (req, res) => {
+    return await questionService.getAllQuestions(req, res)
 }
 
 const insertQuestions = async (req, res) => {
-    const questionCreated = await questionService.createQuestion({
-        question: "Inside which HTML element do we put the JavaScript?",
-        options: ['<scripting>', '<javascript>', '<js>', '<script>'],
-        correctAnswer: 'd',
-        category: 'Javascript'
-    })
-
-    if (questionCreated) {
-        res.json({ message: 'question added' })
-    }
+    return await questionService.createQuestion(req, res)
 }
 
 const deleteQuestion = async (req, res) => {
@@ -25,10 +16,15 @@ const getQuestionByTopic = async(req, res) => {
     return await questionService.getQuestionByTopic(req, res)
 }
 
+const updateQuestion = async(req, res) => {
+    return await questionService.updateQuestion(req, res)
+}
+
 
 export const questionController = {
-    getQuestions,
+    getAllQuestions,
     insertQuestions,
     deleteQuestion,
-    getQuestionByTopic
+    getQuestionByTopic,
+    updateQuestion
 };
