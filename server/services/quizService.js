@@ -125,11 +125,24 @@ const evaluateResult = async (req, res) => {
     }
 };
 
+const getAllQuizzes = async (req, res) => {
+    try {
+        // Fetch all quizzes
+        const quizzes = await quizModel.find().populate('questions').populate('topic').populate('createdBy', '-password');
+
+        res.status(200).json(quizzes);  
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
 const quizService = {
     getQuizCategoryList,
     createQuiz,
     fetchQuizById,
     evaluateResult,
+    getAllQuizzes
 }
 
 export default quizService

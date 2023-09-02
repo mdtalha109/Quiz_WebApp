@@ -20,10 +20,15 @@ const evaluateResult = async(req, res) => {
     return quizService.evaluateResult(req, res)
 }
 
+const getAllQuizzes = async(req, res) => {
+    return quizService.getAllQuizzes(req, res);
+}
+
 export const quizController = {
     getQuizCategoryList,
     createQuiz,
     deleteQuiz,
     fetchQuizById,
-    evaluateResult
+    evaluateResult,
+    getAllQuizzes
 }
