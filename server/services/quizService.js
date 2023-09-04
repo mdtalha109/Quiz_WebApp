@@ -1,6 +1,7 @@
 import quizModel from "../models/quizModel.js";
 import quizTopicModel  from '../models/quizTopicModel.js';
 import { QuestionModel } from '../models/questionModel.js';
+import ResultModel from '../models/resultModel.js';
 import mongoose from "mongoose";
 
 const getQuizCategoryList = async (req, res) => {
@@ -56,15 +57,13 @@ const createQuiz = async (req, res) => {
 const fetchQuizById = async(req, res) => {
     const {id} = req.params;
     try{
-        console.log("quiz id: ", id)
+       
         const resultedQuiz =  await quizModel.findById(id).populate("questions")
-        console.log("resultedQuiz: ", resultedQuiz)
+       
         res.status(200).json(resultedQuiz);
     }catch(error) {
         res.status(500).json({ error: 'Internal server error2' });
-    }
-
-    
+    }   
 }
 
 const deleteQuiz = async (req, res) => {
@@ -82,7 +81,12 @@ const deleteQuiz = async (req, res) => {
 
 const evaluateResult = async (req, res) => {
     try {
-        const { quizId, responses } = req.body;
+        let { quizId, responses } = req.body;
+        const createdByUserId = req.user
+
+        if(responses.length == 0){
+            return res.status(404).json({ message: 'Something went wrong' });
+        }
 
         const quiz = await quizModel.findById(quizId).populate('questions');
         let quizQuestions =  quiz.questions
@@ -95,8 +99,9 @@ const evaluateResult = async (req, res) => {
             quizObj["question"] = item.question
             quizObj["correctAnswer"] = item.correctAnswer
             quizObj["selectedAnswer"] = responses[index]
-
+            quizObj["status"] = (item.correctAnswer == responses[index]) ? 'Correct' : 'Incorrect'
             quizArr.push(quizObj)
+            
         })
   
         if (!quiz) {
@@ -118,6 +123,16 @@ const evaluateResult = async (req, res) => {
         }
 
         const score = (correctAnswers / totalQuestions) * 100;
+
+        const result = new ResultModel({
+            user: createdByUserId,
+            quiz: quizId,
+            score,
+            totalQuestions,
+            selectedAnswer: responses,
+        });
+
+        await result.save();
        
         res.json({ score, totalQuestions, quizArr });
     } catch (error) {
@@ -137,12 +152,34 @@ const getAllQuizzes = async (req, res) => {
     }
 };
 
+const allQuizByUser = async (req, res) => {
+    const userId = req.user; 
+
+    console.log('userId: ', userId)
+
+    try {
+        const quizzesAttemptedByUser = await ResultModel.find({ user: userId })
+            .populate('quiz')
+            .populate('quiz.questions')
+            .populate('quiz.topic')
+            .populate('quiz.createdBy', '-password');
+
+        res.status(200).json(quizzesAttemptedByUser);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+
 const quizService = {
     getQuizCategoryList,
     createQuiz,
     fetchQuizById,
     evaluateResult,
-    getAllQuizzes
+    getAllQuizzes,
+    allQuizByUser
 }
 
 export default quizService

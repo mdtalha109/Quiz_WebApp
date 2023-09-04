@@ -24,11 +24,16 @@ const getAllQuizzes = async(req, res) => {
     return quizService.getAllQuizzes(req, res);
 }
 
+const allQuizByUser = async(req, res) => {
+    return quizService.allQuizByUser(req, res)
+}
+
 export const quizController = {
     getQuizCategoryList,
     createQuiz,
     deleteQuiz,
     fetchQuizById,
     evaluateResult,
-    getAllQuizzes
+    getAllQuizzes,
+    allQuizByUser
 }

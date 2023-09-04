@@ -12,8 +12,9 @@ router.post('/create-topic', quizTopicController.createQuizTopic)
 router.get('/get-topic', quizTopicController.getQuizTopic)
 router.post('/update-topic', quizTopicController.updateQuizTopic)
 router.delete('/delete-topic', quizTopicController.deleteQuizTopic)
-router.post('/calculate-result', quizController.evaluateResult)
+router.post('/calculate-result',authenticateUser, quizController.evaluateResult)
 router.get('/all-quiz', quizController.getAllQuizzes)
+router.get('/user',authenticateUser, quizController.allQuizByUser)
 
 
 

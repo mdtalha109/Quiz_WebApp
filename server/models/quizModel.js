@@ -26,6 +26,13 @@ const QuizSchema = new mongoose.Schema({
         ref: 'User',
     },
 
+    result: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Result',
+        },
+    ],
+
     createdAt: {
         type: Date,
         default: Date.now
