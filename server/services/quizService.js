@@ -1,5 +1,5 @@
 import quizModel from "../models/quizModel.js";
-import quizTopicModel  from '../models/quizTopicModel.js';
+import quizTopicModel from '../models/quizTopicModel.js';
 import { QuestionModel } from '../models/questionModel.js';
 import ResultModel from '../models/resultModel.js';
 import mongoose from "mongoose";
@@ -19,7 +19,9 @@ const getQuizCategoryList = async (req, res) => {
 
 const createQuiz = async (req, res) => {
 
-    const { topic } = req.body
+    const { topic, mode } = req.body
+    const { title, description, questions } = req.query;
+
 
     const createdByUserId = req.user;
     try {
@@ -30,18 +32,30 @@ const createQuiz = async (req, res) => {
             return res.status(404).json({ error: 'Topic not found' });
         }
 
-        // fetch random 5 question
-        const questions = await QuestionModel.aggregate([
-            { $match: { topic: new mongoose.Types.ObjectId(quizTopic._id) } },
-            { $sample: { size: 5 } },
-        ]);
+        let questionsIds;
+
+
+        if (mode == 'random') {
+            questionsIds = await QuestionModel.aggregate([
+                { $match: { topic: new mongoose.Types.ObjectId(quizTopic._id) } },
+                { $sample: { size: 5 } },
+            ]);
+
+            questionsIds = questionsIds.map((question) => question._id);
+        }
+        else {
+            questionsIds = questions;
+
+        }
+
         // create quiz
         const quizData = {
-            title: `${topic} quiz`,
-            description: `${topic} descriptions`,
+            title: mode == 'random' ? `${topic} quiz` : title,
+            description: 'random' ? `${topic} description` : description,
             topic: quizTopic._id,
-            questions: questions.map((question) => question._id),
-            createdBy: createdByUserId
+            questions: questionsIds,
+            createdBy: createdByUserId,
+            mode: mode
         };
 
         const quiz = await quizModel.create(quizData);
@@ -153,10 +167,7 @@ const getAllQuizzes = async (req, res) => {
 };
 
 const allQuizByUser = async (req, res) => {
-    const userId = req.user; 
-
-    console.log('userId: ', userId)
-
+    const userId = req.user;
     try {
         const quizzesAttemptedByUser = await ResultModel.find({ user: userId })
             .populate('quiz')
