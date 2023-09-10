@@ -1,5 +1,6 @@
 import { QuestionModel } from '../models/questionModel.js';
 import  quizTopicModel  from '../models/quizTopicModel.js';
+import User from '../models/userModel.js'
 
 
 /**
@@ -11,11 +12,34 @@ import  quizTopicModel  from '../models/quizTopicModel.js';
  */
 const getAllQuestions = async (req, res) => {
   try {
-    const questions = await QuestionModel.find();
+
+    const userId = req.user;
+    const topicname = req.query.topic;
+    const topic = await quizTopicModel.findOne({name:topicname})
+    const topicId = topic?._id;
+    const user = await User.findById(userId)
+    if(!user){
+      res.status(404).json({message: 'User not found'})
+    }
+
+    const query = {
+      visibility : user.isAdmin == true ? 'private' : 'private',
+      createdBy: userId
+    }
+
+    if(topicId){
+      query.topic = topicId
+    }
+
+
+    const questions = await QuestionModel.find(query);
+    console.log(questions)
+
     if (questions) {
       return res.status(200).json(questions)
     }
   } catch (error) {
+    console.log('error: ', error)
     return res.status(404).json({ message: 'Question not found.' });
   }
 };
@@ -29,6 +53,7 @@ const getAllQuestions = async (req, res) => {
  */
  const createQuestion = async (req, res) => {
   const { question, options, correctAnswer, topicName } = req.body;
+  const userId = req.user
 
   try {
     const quizTopic = await quizTopicModel.findOne({ name: topicName });
@@ -37,12 +62,18 @@ const getAllQuestions = async (req, res) => {
       return res.status(404).json({ message: 'Quiz topic not found.' });
     }
 
+    const user = User.findById(userId)
+    let visibility = user.isAdmin == true ? 'public' : 'private'
+
+
     // Create the question
     const createdQuestion = await QuestionModel.create({
       question,
       options,
       correctAnswer,
-      topic: quizTopic._id 
+      topic: quizTopic._id,
+      createdBy: userId,
+      visibility: visibility
     });
 
     return res.status(201).json(createdQuestion);

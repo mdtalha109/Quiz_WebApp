@@ -18,6 +18,15 @@ const QuestionSchema = new mongoose.Schema({
     required: true,
     ref: 'QuizTopic'
   },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'User',
+  },
+  visibility: {
+    type: String,
+    required: true
+  },
   createdAt: {
     type: Date,
     default: Date.now
