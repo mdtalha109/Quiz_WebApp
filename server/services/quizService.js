@@ -102,6 +102,8 @@ const evaluateResult = async (req, res) => {
             return res.status(404).json({ message: 'Something went wrong' });
         }
 
+        await quizModel.findByIdAndUpdate(quizId, { isAttempted: true })
+
         const quiz = await quizModel.findById(quizId).populate('questions');
         let quizQuestions =  quiz.questions
 
@@ -168,14 +170,26 @@ const getAllQuizzes = async (req, res) => {
 
 const allQuizByUser = async (req, res) => {
     const userId = req.user;
-    try {
-        const quizzesAttemptedByUser = await ResultModel.find({ user: userId })
-            .populate('quiz')
-            .populate('quiz.questions')
-            .populate('quiz.topic')
-            .populate('quiz.createdBy', '-password');
+    const {mode} = req.query
 
-        res.status(200).json(quizzesAttemptedByUser);
+    let query = {
+        createdBy: userId
+    }
+
+    if(mode){
+        query.mode = mode;
+    }
+
+    let quiz;
+    try {
+        if(mode == 'custom'){
+            quiz = await quizModel.find(query).populate('topic')
+        }
+        else {
+            quiz = await ResultModel.find({user: userId})
+        }
+       
+        res.status(200).json(quiz);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal server error' });
