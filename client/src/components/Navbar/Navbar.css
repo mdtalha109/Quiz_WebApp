@@ -3,14 +3,24 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #f0f0f0;
+  /* background-color: #f0f0f0; */
+  /* background-color:  rgba(0, 0, 0, 0.1); */
+  background-color: #333333;
   padding: 10px 40px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .navbar-logo {
   font-size: 20px;
   font-weight: bold;
+  color: white;
+}
+
+.navbar-logo a{
+  color: white;
 }
 
 button {
@@ -27,6 +37,10 @@ button:hover {
 }
 
 .navbar_action_container{
+  display: flex;
+}
+
+.navbar_action_container div{
   display: flex;
 }
 

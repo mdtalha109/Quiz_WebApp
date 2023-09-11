@@ -18,6 +18,10 @@ const Navbar = () => {
     navigate('/auth?action=register')
   }
 
+  const navigateToDashboard= (to) => {
+    navigate('/dashboard/home')
+  }
+
   
 
   const handleLogout = () => {
@@ -33,7 +37,11 @@ const Navbar = () => {
 
       <div className='navbar_action_container'>
       {isAuthenticated ? (
-        <button onClick={handleLogout}>Logout</button>
+        <div>
+          <button onClick={navigateToDashboard}>Dashboard</button>
+          <button onClick={handleLogout}>Logout</button>
+          </div>
+        
       ) : (<>
              <button onClick={navigateToLogin}>  Login</button>
              <button onClick={navigateToRegister}>Register</button></>
