@@ -8,11 +8,9 @@ const getQuizCategoryList = async (req, res) => {
     try {
 
         let quizCategoryList = await quizModel.distinct('category');
-
         res.status(200).json(quizCategoryList)
 
     } catch (err) {
-
         res.status(404).json({ message: "Something went wrong..!!", err })
     }
 }
@@ -26,14 +24,13 @@ const createQuiz = async (req, res) => {
     const createdByUserId = req.user;
     try {
         // Sanity check
-        const quizTopic = await quizTopicModel.findOne({ name: topic });
-
+        let quizTopic = await quizTopicModel.findOne({ name: topic });
+        // quizTopic = null
         if (!quizTopic) {
-            return res.status(404).json({ error: 'Topic not found' });
+            return res.status(404).json({ message: 'Topic not found' }); 
         }
 
         let questionsIds;
-
 
         if (mode == 'random') {
             questionsIds = await QuestionModel.aggregate([
@@ -47,7 +44,6 @@ const createQuiz = async (req, res) => {
             questionsIds = questions;
 
         }
-
         // create quiz
         const quizData = {
             title: mode == 'random' ? `${topic} quiz` : title,
@@ -64,7 +60,7 @@ const createQuiz = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal server error1' });
+        res.status(500).json({ message: error });
     }
 }
 
@@ -183,10 +179,10 @@ const allQuizByUser = async (req, res) => {
     let quiz;
     try {
         if(mode == 'custom'){
-            quiz = await quizModel.find(query).populate('topic')
+            quiz = await quizModel.find(query).populate('topic').sort({ createdAt: -1 });
         }
         else {
-            quiz = await ResultModel.find({user: userId})
+            quiz = await ResultModel.find({user: userId}).populate('quiz').sort({createdAt: 1})
         }
        
         res.status(200).json(quiz);
